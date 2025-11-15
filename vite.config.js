@@ -3,5 +3,5 @@ import react from "@vitejs/plugin-react";
 
 export default defineConfig({
   plugins: [react()],
-  base: "/montreal-atlacomulco/",  // nombre EXACTO de tu repo
+  base: "./",  // nombre EXACTO de tu repo
 });
