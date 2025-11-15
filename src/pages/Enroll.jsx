@@ -22,16 +22,28 @@ export default function Enroll() {
     setSelectedLevel("");
   };
 
+  // 🔥 VALIDACIÓN DE CORREO
+  const validarCorreo = (correo) => {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(correo);
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     setIsSubmitting(true);
 
-    // Convertimos los datos del formulario
     const formData = new FormData(event.target);
     const datos = Object.fromEntries(formData.entries());
 
-    // Convertir checkbox "nuevo_ingreso" a true/false
+    // Convertir checkbox
     datos.nuevo_ingreso = formData.get("nuevo_ingreso") ? true : false;
+
+    // ✔️ Validación ANTES de enviar al backend
+    if (!validarCorreo(datos.correo)) {
+      alert("⚠️ El correo no es válido. Usa un formato como: correo@gmail.com");
+      setIsSubmitting(false);
+      return;
+    }
 
     try {
       const response = await fetch(`${API_URL}/inscripciones/`, {
@@ -104,9 +116,7 @@ export default function Enroll() {
               {/* Nuevo ingreso */}
               <div className="form-check mb-3">
                 <input type="checkbox" name="nuevo_ingreso" className="form-check-input" defaultChecked />
-                <label className="form-check-label fw-bold ms-2">
-                  Alumno de nuevo ingreso
-                </label>
+                <label className="form-check-label fw-bold ms-2">Alumno de nuevo ingreso</label>
               </div>
 
               {/* Curso */}
@@ -133,9 +143,7 @@ export default function Enroll() {
                   >
                     <option value="">Selecciona una opción</option>
                     {courseLevels[selectedCourse].map((level, index) => (
-                      <option key={index} value={level}>
-                        {level}
-                      </option>
+                      <option key={index} value={level}>{level}</option>
                     ))}
                   </select>
                 </div>
