@@ -4,7 +4,7 @@ import certBanner from "../assets/certificaciones-banner.png";
 import aboutImg from "../assets/about.png";
 import ContactoFormulario from "../components/ContactoFormulario";
 import BannerMontreal from "../components/BannerMontreal";
-import audioMontreal from "../assets/montreal-audio.mp3";
+
 
 
 export default function Home() {
@@ -162,11 +162,11 @@ export default function Home() {
         <h2 className="mb-3" style={{ color: "#1565C0" }}>
           Escucha nuestro mensaje institucional
         </h2>
-
         <audio controls className="w-75">
-  <source src={audioMontreal} type="audio/mpeg" />
-  Tu navegador no soporta el elemento de audio.
-</audio>
+        <source src="/montreal-audio.mp3" type="audio/mpeg" />
+         Tu navegador no soporta el elemento de audio.
+        </audio>
+
 
       </section>
 
