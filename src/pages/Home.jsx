@@ -4,6 +4,8 @@ import certBanner from "../assets/certificaciones-banner.png";
 import aboutImg from "../assets/about.png";
 import ContactoFormulario from "../components/ContactoFormulario";
 import BannerMontreal from "../components/BannerMontreal";
+import audioMontreal from "../assets/montreal-audio.mp3";
+
 
 export default function Home() {
   // Scroll suave hacia el formulario de contacto
@@ -162,12 +164,10 @@ export default function Home() {
         </h2>
 
         <audio controls className="w-75">
-          <source
-            src="https://drive.google.com/file/d/1nx_WiDg8YYtjkxiO_FBTIXIeNgUBm4YR/view?usp=drive_link"
-            type="audio/mpeg"
-          />
-          Tu navegador no soporta el elemento de audio.
-        </audio>
+  <source src={audioMontreal} type="audio/mpeg" />
+  Tu navegador no soporta el elemento de audio.
+</audio>
+
       </section>
 
     </div>
