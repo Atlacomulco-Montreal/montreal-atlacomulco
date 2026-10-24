@@ -16,21 +16,40 @@ export default function Inscripciones() {
   });
 
   // URL base del backend
-  const API_URL = "https://montreal-backend-production-def9.up.railway.app/api";
+  //const API_URL = "https://montreal-backend-production-def9.up.railway.app/api";
+  const API_URL = "http://127.0.0.1:8000/api";
+  
 
   // =========================
   // CARGAR INSCRIPCIONES
   // =========================
-  const cargarInscripciones = async () => {
-    try {
-      const res = await fetch(`${API_URL}/inscripciones/`);
-      const data = await res.json();
-      setInscripciones(data);
-    } catch (error) {
-      console.error(error);
-      alert("⚠️ Error al cargar inscripciones.");
+    
+const cargarInscripciones = async () => {
+  try {
+    const res = await fetch(`${API_URL}/inscripciones/`);
+
+    if (!res.ok) {
+      throw new Error(`Error HTTP ${res.status}: ${res.statusText}`);
     }
-  };
+
+    const data = await res.json();
+
+    // La API debe devolver una lista o una respuesta paginada
+    if (Array.isArray(data)) {
+      setInscripciones(data);
+    } else if (Array.isArray(data.results)) {
+      setInscripciones(data.results);
+    } else {
+      console.error("Respuesta inesperada de la API:", data);
+      setInscripciones([]);
+      alert("La API respondió, pero el formato de las inscripciones es diferente.");
+    }
+  } catch (error) {
+    console.error("Error al cargar inscripciones:", error);
+    alert(`No se pudieron cargar las inscripciones. ${error.message}`);
+  }
+};
+
 
   useEffect(() => {
     cargarInscripciones();

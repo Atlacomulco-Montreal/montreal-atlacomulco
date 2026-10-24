@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 
@@ -13,11 +14,16 @@ import Enroll from "./pages/Enroll";
 import Inscripciones from "./pages/Inscripciones";
 import NotFound from "./pages/NotFound";
 
+import PruebaConexion from "./PruebaConexion";
+
 export default function App() {
   return (
     <>
       <ScrollToTop />
       <Navbar />
+
+      {/* Prueba temporal de conexión con Django */}
+      <PruebaConexion />
 
       <Routes>
         <Route path="/" element={<Home />} />
