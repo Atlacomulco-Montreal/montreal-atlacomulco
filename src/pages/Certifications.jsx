@@ -7,12 +7,12 @@ export default function Certifications() {
   const location = useLocation();
 
   // ❗ CORRECCIÓN: tu API_URL ya incluía /api
-  //const API_URL = "https://montreal-backend-production-def9.up.railway.app";
-  const API_URL = "http://127.0.0.1:8000/";
+  const API_URL = import.meta.env.VITE_API_URL || "https://montreal-backend-trh7.onrender.com/api";
+  //const API_URL = "http://127.0.0.1:8000/";
 
   // Cargar certificaciones
   useEffect(() => {
-    fetch(`${API_URL}/api/certificaciones/`)
+    fetch(`${API_URL}/certificaciones/`)
       .then((res) => res.json())
       .then((data) => setCertificaciones(data))
       .catch((err) => console.error("Error al cargar certificaciones:", err));

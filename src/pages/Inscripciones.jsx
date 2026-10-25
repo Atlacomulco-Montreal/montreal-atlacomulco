@@ -16,8 +16,8 @@ export default function Inscripciones() {
   });
 
   // URL base del backend
-  //const API_URL = "https://montreal-backend-production-def9.up.railway.app/api";
-  const API_URL = "http://127.0.0.1:8000/api";
+  const API_URL = import.meta.env.VITE_API_URL || "https://montreal-backend-trh7.onrender.com/api";
+  //const API_URL = "http://127.0.0.1:8000/api";
   
 
   // =========================
