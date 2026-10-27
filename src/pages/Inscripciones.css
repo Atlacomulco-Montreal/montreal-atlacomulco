@@ -1,0 +1,327 @@
+
+/* =========================================
+   DISEÑO GENERAL
+========================================= */
+
+#root {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.container-inscripciones {
+  width: 100%;
+  max-width: 100%;
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: 2rem;
+  background: #f8f9fc;
+  border-radius: 16px;
+  color: #242424;
+  text-align: center;
+}
+
+/* =========================================
+   TÍTULOS
+========================================= */
+
+.titulo-inscripciones {
+  color: #242424;
+  font-size: clamp(1.5rem, 3vw, 2.2rem);
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  margin-bottom: 0.5rem;
+}
+
+.container-inscripciones p {
+  line-height: 1.6;
+}
+
+.text-secondary {
+  color: #777 !important;
+}
+
+/* =========================================
+   TARJETAS
+========================================= */
+
+.container-inscripciones .card {
+  border: 1px solid #e8e8ee;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 4px 18px rgb(0 0 0 / 5%);
+  transition:
+    box-shadow 300ms ease,
+    transform 300ms ease;
+}
+
+.container-inscripciones .card:hover {
+  box-shadow: 0 8px 25px rgb(0 0 0 / 9%);
+}
+
+.container-inscripciones .card-body {
+  padding: 1.5rem;
+}
+
+.resumen-inscripciones {
+  border-left: 4px solid #646cff !important;
+  text-align: center;
+}
+
+.numero-inscripciones {
+  color: #646cff;
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-top: 0.5rem;
+}
+
+/* =========================================
+   TABLA RESPONSIVA
+========================================= */
+
+.tabla-contenedor {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  border: 1px solid #e8e8ee;
+  border-radius: 12px;
+  background: #ffffff;
+  -webkit-overflow-scrolling: touch;
+}
+
+.tabla-inscripciones {
+  width: 100%;
+  min-width: 1100px;
+  margin-bottom: 0;
+  font-size: 0.9rem;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.tabla-inscripciones thead th {
+  background: #f1f2ff;
+  color: #33345c;
+  font-weight: 700;
+  padding: 1rem;
+  white-space: nowrap;
+  border-bottom: 2px solid #dedfff;
+}
+
+.tabla-inscripciones tbody td {
+  padding: 0.9rem 0.75rem;
+  border-color: #eeeeF4;
+}
+
+.tabla-inscripciones tbody tr {
+  transition: background-color 200ms ease;
+}
+
+.tabla-inscripciones tbody tr:hover > * {
+  background-color: #f5f5ff;
+}
+
+.tabla-inscripciones .comentarios-celda {
+  min-width: 180px;
+  max-width: 260px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+/* =========================================
+   BOTONES
+========================================= */
+
+.container-inscripciones .btn {
+  border-radius: 9px;
+  font-weight: 500;
+  transition:
+    transform 200ms ease,
+    box-shadow 200ms ease,
+    filter 200ms ease;
+}
+
+.container-inscripciones .btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgb(0 0 0 / 10%);
+}
+
+.container-inscripciones .btn:active {
+  transform: translateY(0);
+}
+
+.container-inscripciones .btn-warning {
+  color: #242424;
+}
+
+.tabla-inscripciones .btn {
+  min-width: 38px;
+  min-height: 36px;
+}
+
+/* =========================================
+   CAMPOS DEL FORMULARIO
+========================================= */
+
+.container-inscripciones .form-control {
+  min-height: 44px;
+  border: 1px solid #dedee8;
+  border-radius: 9px;
+  padding: 0.7rem 0.9rem;
+  text-align: left;
+  background-color: #fff;
+  transition:
+    border-color 200ms ease,
+    box-shadow 200ms ease;
+}
+
+.container-inscripciones .form-control:focus {
+  border-color: #646cff;
+  box-shadow: 0 0 0 3px rgb(100 108 255 / 15%);
+  outline: none;
+}
+
+.container-inscripciones textarea.form-control {
+  min-height: 100px;
+}
+
+.container-inscripciones .form-label {
+  display: block;
+  text-align: left;
+  margin-bottom: 0.5rem;
+}
+
+/* Formulario de edición */
+#formulario-edicion {
+  scroll-margin-top: 20px;
+  text-align: left;
+  overflow: hidden;
+}
+
+#formulario-edicion .card-header {
+  background: #646cff !important;
+  border: none;
+}
+
+#formulario-edicion h4 {
+  font-weight: 700;
+}
+
+#formulario-edicion .form-check {
+  text-align: left;
+}
+
+/* =========================================
+   MENSAJES Y CARGA
+========================================= */
+
+.container-inscripciones .alert {
+  border-radius: 10px;
+  text-align: left;
+}
+
+.container-inscripciones .spinner-border {
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
+/* =========================================
+   ANIMACIONES SUAVES
+========================================= */
+
+@keyframes aparecer {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.container-inscripciones > * {
+  animation: aparecer 350ms ease both;
+}
+
+/* =========================================
+   TABLETAS
+========================================= */
+
+@media (max-width: 991.98px) {
+  #root {
+    padding: 1rem;
+  }
+
+  .container-inscripciones {
+    padding: 1.25rem;
+  }
+
+  .container-inscripciones .card-body {
+    padding: 1rem;
+  }
+}
+
+/* =========================================
+   CELULARES
+========================================= */
+
+@media (max-width: 575.98px) {
+  #root {
+    padding: 0.5rem;
+  }
+
+  .container-inscripciones {
+    padding: 0.75rem;
+    border-radius: 10px;
+  }
+
+  .titulo-inscripciones {
+    font-size: 1.4rem;
+  }
+
+  .container-inscripciones .card {
+    border-radius: 12px;
+  }
+
+  .container-inscripciones .card-body {
+    padding: 0.85rem;
+  }
+
+  .tabla-inscripciones {
+    min-width: 1100px;
+    font-size: 0.82rem;
+  }
+
+  .tabla-inscripciones thead th,
+  .tabla-inscripciones tbody td {
+    padding: 0.7rem;
+  }
+
+  #formulario-edicion .btn {
+    width: 100%;
+    min-height: 44px;
+  }
+}
+
+/* =========================================
+   ACCESIBILIDAD
+========================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
