@@ -1,6 +1,17 @@
-
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import "./Inscripciones.css";
+
+const FORM_INICIAL = {
+  nombre: "",
+  correo: "",
+  telefono: "",
+  edad: "",
+  curso: "",
+  nivel: "",
+  fecha_inicio: "",
+  nuevo_ingreso: true,
+  comentarios: "",
+};
 
 export default function Inscripciones() {
   const [inscripciones, setInscripciones] = useState([]);
@@ -9,50 +20,35 @@ export default function Inscripciones() {
   const [cargando, setCargando] = useState(false);
   const [guardando, setGuardando] = useState(false);
   const [error, setError] = useState("");
+  const [formData, setFormData] = useState(FORM_INICIAL);
 
-  const [formData, setFormData] = useState({
-    nombre: "",
-    correo: "",
-    telefono: "",
-    edad: "",
-    curso: "",
-    nivel: "",
-    fecha_inicio: "",
-    nuevo_ingreso: true,
-    comentarios: "",
-  });
-
-  // URL del backend Django desplegado
+  // Acepta VITE_API_URL con o sin "/" al final.
   const API_URL = (
     import.meta.env.VITE_API_URL ||
     "https://montreal-backend-trh7.onrender.com/api"
   ).replace(/\/+$/, "");
 
-  // CONSULTAR INSCRIPCIONES
   const cargarInscripciones = async () => {
     setCargando(true);
     setError("");
 
     try {
       const res = await fetch(`${API_URL}/inscripciones/`);
-
-      if (!res.ok) {
-        throw new Error(`Error HTTP ${res.status}`);
-      }
+      if (!res.ok) throw new Error(`Error HTTP ${res.status}`);
 
       const data = await res.json();
+      const lista = Array.isArray(data)
+        ? data
+        : Array.isArray(data?.results)
+          ? data.results
+          : null;
 
-      if (Array.isArray(data)) {
-        setInscripciones(data);
-      } else if (Array.isArray(data.results)) {
-        setInscripciones(data.results);
-      } else {
-        throw new Error("El formato de respuesta no es válido.");
-      }
+      if (!lista) throw new Error("El formato de respuesta no es válido.");
+      setInscripciones(lista);
     } catch (err) {
-      console.error(err);
+      console.error("Error al cargar inscripciones:", err);
       setError(
-        "No se pudieron cargar las inscripciones. Verifica la conexión con el servidor."
+        "No se pudieron cargar las inscripciones. Verifica tu conexión con el servidor."
       );
     } finally {
       setCargando(false);
@@ -61,9 +57,10 @@ export default function Inscripciones() {
 
   useEffect(() => {
     cargarInscripciones();
+    // La URL no cambia durante la vida del componente.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // ELIMINAR INSCRIPCIÓN
   const eliminarInscripcion = async (id) => {
     if (!window.confirm("¿Deseas eliminar esta inscripción?")) return;
 
@@ -71,23 +68,19 @@ export default function Inscripciones() {
       const res = await fetch(`${API_URL}/inscripciones/${id}/`, {
         method: "DELETE",
       });
+      if (!res.ok) throw new Error(`Error HTTP ${res.status}`);
 
-      if (!res.ok) {
-        throw new Error(`Error HTTP ${res.status}`);
-      }
-
+      setInscripciones((actuales) => actuales.filter((item) => item.id !== id));
+      if (editId === id) cancelarEdicion();
       alert("Inscripción eliminada correctamente.");
-      await cargarInscripciones();
     } catch (err) {
-      console.error(err);
-      alert("No se pudo eliminar la inscripción.");
+      console.error("Error al eliminar:", err);
+      alert("No se pudo eliminar la inscripción. Intenta nuevamente.");
     }
   };
 
-  // INICIAR EDICIÓN
   const iniciarEdicion = (item) => {
     setEditId(item.id);
-
     setFormData({
       nombre: item.nombre ?? "",
       correo: item.correo ?? "",
@@ -103,26 +96,26 @@ export default function Inscripciones() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // GUARDAR CAMBIOS
+  const cancelarEdicion = () => {
+    setEditId(null);
+    setFormData(FORM_INICIAL);
+  };
+
   const guardarEdicion = async (e) => {
     e.preventDefault();
-    setGuardando(true);
+    if (editId === null) return;
 
+    setGuardando(true);
     try {
-      const res = await fetch(
-        `${API_URL}/inscripciones/${editId}/`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            ...formData,
-            edad:
-              formData.edad === "" ? null : Number(formData.edad),
-          }),
-        }
-      );
+      const res = await fetch(`${API_URL}/inscripciones/${editId}/`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...formData,
+          edad: formData.edad === "" ? null : Number(formData.edad),
+          nuevo_ingreso: Boolean(formData.nuevo_ingreso),
+        }),
+      });
 
       if (!res.ok) {
         const detalle = await res.text();
@@ -130,55 +123,46 @@ export default function Inscripciones() {
       }
 
       alert("Cambios guardados correctamente.");
-      setEditId(null);
+      cancelarEdicion();
       await cargarInscripciones();
     } catch (err) {
-      console.error(err);
-      alert("No se pudieron guardar los cambios. Verifica los datos.");
+      console.error("Error al guardar:", err);
+      alert("No se pudieron guardar los cambios. Verifica los datos e intenta nuevamente.");
     } finally {
       setGuardando(false);
     }
   };
 
-  // ACTUALIZAR FORMULARIO
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-
     setFormData((prev) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }));
   };
 
-  // FILTRAR INSCRIPCIONES
-  const inscripcionesFiltradas = inscripciones.filter((item) =>
-    [
-      item.nombre,
-      item.correo,
-      item.telefono,
-      item.curso,
-      item.nivel,
-    ]
-      .some((dato) =>
-        String(dato ?? "")
-          .toLowerCase()
-          .includes(busqueda.toLowerCase())
-      )
-  );
+  const inscripcionesFiltradas = useMemo(() => {
+    const termino = busqueda.trim().toLowerCase();
+    if (!termino) return inscripciones;
+
+    return inscripciones.filter((item) =>
+      [item.nombre, item.correo, item.telefono, item.curso, item.nivel]
+        .some((dato) => String(dato ?? "").toLowerCase().includes(termino))
+    );
+  }, [inscripciones, busqueda]);
 
   return (
     <main className="container-fluid container-inscripciones py-4 px-3 px-md-4">
       <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
         <div>
-          <h2 className="titulo-inscripciones mb-1">
-            Gestión de inscripciones
-          </h2>
+          <h2 className="titulo-inscripciones mb-1">Gestión de inscripciones</h2>
           <p className="text-secondary mb-0">
             Consulta, edita y administra las inscripciones.
           </p>
         </div>
 
         <button
+          type="button"
           className="btn btn-outline-primary"
           onClick={cargarInscripciones}
           disabled={cargando}
@@ -192,15 +176,13 @@ export default function Inscripciones() {
           <div className="card resumen-inscripciones h-100">
             <div className="card-body">
               <div className="text-secondary">Total de inscripciones</div>
-              <div className="numero-inscripciones">
-                {inscripciones.length}
-              </div>
+              <div className="numero-inscripciones">{inscripciones.length}</div>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="card border-0 shadow-sm">
+      <section className="card border-0 shadow-sm">
         <div className="card-body p-3 p-md-4">
           <div className="row g-3 mb-4 align-items-center">
             <div className="col-12 col-md-8">
@@ -213,7 +195,6 @@ export default function Inscripciones() {
                 aria-label="Buscar inscripciones"
               />
             </div>
-
             <div className="col-12 col-md-4 text-md-end">
               <span className="text-secondary">
                 Resultados: {inscripcionesFiltradas.length}
@@ -225,8 +206,10 @@ export default function Inscripciones() {
             <div className="alert alert-danger" role="alert">
               {error}
               <button
+                type="button"
                 className="btn btn-sm btn-outline-danger ms-2"
                 onClick={cargarInscripciones}
+                disabled={cargando}
               >
                 Reintentar
               </button>
@@ -235,17 +218,13 @@ export default function Inscripciones() {
 
           {cargando && inscripciones.length === 0 ? (
             <div className="text-center py-5">
-              <div
-                className="spinner-border text-primary"
-                role="status"
-              >
+              <div className="spinner-border text-primary" role="status">
                 <span className="visually-hidden">Cargando...</span>
               </div>
               <p className="mt-3">Cargando inscripciones...</p>
             </div>
           ) : (
             <>
-              {/* TABLA PARA COMPUTADORAS Y TABLETAS */}
               <div className="table-responsive tabla-contenedor">
                 <table className="table table-striped table-hover align-middle tabla-inscripciones mb-0">
                   <thead>
@@ -262,23 +241,20 @@ export default function Inscripciones() {
                       <th>Acciones</th>
                     </tr>
                   </thead>
-
                   <tbody>
                     {inscripcionesFiltradas.map((item) => (
                       <tr key={item.id}>
-                        <td className="fw-semibold">{item.nombre}</td>
-                        <td>{item.correo}</td>
-                        <td>{item.telefono}</td>
-                        <td>{item.edad}</td>
-                        <td>{item.curso}</td>
-                        <td>{item.nivel}</td>
-                        <td>{item.fecha_inicio}</td>
+                        <td className="fw-semibold">{item.nombre || "—"}</td>
+                        <td>{item.correo || "—"}</td>
+                        <td>{item.telefono || "—"}</td>
+                        <td>{item.edad ?? "—"}</td>
+                        <td>{item.curso || "—"}</td>
+                        <td>{item.nivel || "—"}</td>
+                        <td>{item.fecha_inicio || "—"}</td>
                         <td>
                           <span
                             className={`badge ${
-                              item.nuevo_ingreso
-                                ? "text-bg-success"
-                                : "text-bg-secondary"
+                              item.nuevo_ingreso ? "text-bg-success" : "text-bg-secondary"
                             }`}
                           >
                             {item.nuevo_ingreso ? "Sí" : "No"}
@@ -293,19 +269,16 @@ export default function Inscripciones() {
                               type="button"
                               className="btn btn-warning btn-sm"
                               onClick={() => iniciarEdicion(item)}
-                              aria-label={`Editar ${item.nombre}`}
+                              aria-label={`Editar ${item.nombre || "inscripción"}`}
                               title="Editar"
                             >
                               ✏️
                             </button>
-
                             <button
                               type="button"
                               className="btn btn-danger btn-sm"
-                              onClick={() =>
-                                eliminarInscripcion(item.id)
-                              }
-                              aria-label={`Eliminar ${item.nombre}`}
+                              onClick={() => eliminarInscripcion(item.id)}
+                              aria-label={`Eliminar ${item.nombre || "inscripción"}`}
                               title="Eliminar"
                             >
                               🗑️
@@ -318,28 +291,23 @@ export default function Inscripciones() {
                     {inscripcionesFiltradas.length === 0 && (
                       <tr>
                         <td colSpan="10" className="text-center py-5">
-                          {error
-                            ? "No hay datos disponibles."
-                            : "No se encontraron inscripciones."}
+                          {error ? "No hay datos disponibles." : "No se encontraron inscripciones."}
                         </td>
                       </tr>
                     )}
                   </tbody>
                 </table>
               </div>
-
               <p className="text-secondary small mt-3 mb-0">
-                En pantallas pequeñas puedes deslizar la tabla
-                horizontalmente para consultar todas las columnas.
+                En pantallas pequeñas puedes deslizar la tabla horizontalmente para consultar todas las columnas.
               </p>
             </>
           )}
         </div>
-      </div>
+      </section>
 
-      {/* FORMULARIO DE EDICIÓN */}
       {editId !== null && (
-        <div className="card border-0 shadow-sm mt-4" id="formulario-edicion">
+        <section className="card border-0 shadow-sm mt-4" id="formulario-edicion">
           <div className="card-header bg-primary text-white py-3">
             <h4 className="mb-0">Editar inscripción</h4>
           </div>
@@ -348,149 +316,77 @@ export default function Inscripciones() {
             <form onSubmit={guardarEdicion}>
               <div className="row g-3">
                 <div className="col-12 col-md-6">
-                  <label className="form-label fw-semibold">
-                    Nombre
-                  </label>
-                  <input
-                    required
-                    name="nombre"
-                    className="form-control"
-                    value={formData.nombre}
-                    onChange={handleChange}
-                  />
+                  <label htmlFor="nombre" className="form-label fw-semibold">Nombre</label>
+                  <input id="nombre" required name="nombre" className="form-control"
+                    value={formData.nombre} onChange={handleChange} />
                 </div>
 
                 <div className="col-12 col-md-6">
-                  <label className="form-label fw-semibold">
-                    Correo
-                  </label>
-                  <input
-                    type="email"
-                    name="correo"
-                    className="form-control"
-                    value={formData.correo}
-                    onChange={handleChange}
-                  />
+                  <label htmlFor="correo" className="form-label fw-semibold">Correo</label>
+                  <input id="correo" type="email" name="correo" className="form-control"
+                    value={formData.correo} onChange={handleChange} />
                 </div>
 
                 <div className="col-12 col-md-6">
-                  <label className="form-label fw-semibold">
-                    Teléfono
-                  </label>
-                  <input
-                    name="telefono"
-                    type="tel"
-                    className="form-control"
-                    value={formData.telefono}
-                    onChange={handleChange}
-                  />
+                  <label htmlFor="telefono" className="form-label fw-semibold">Teléfono</label>
+                  <input id="telefono" name="telefono" type="tel" className="form-control"
+                    value={formData.telefono} onChange={handleChange} />
                 </div>
 
                 <div className="col-12 col-md-6">
-                  <label className="form-label fw-semibold">
-                    Edad
-                  </label>
-                  <input
-                    type="number"
-                    min="0"
-                    name="edad"
-                    className="form-control"
-                    value={formData.edad}
-                    onChange={handleChange}
-                  />
+                  <label htmlFor="edad" className="form-label fw-semibold">Edad</label>
+                  <input id="edad" type="number" min="0" name="edad" className="form-control"
+                    value={formData.edad} onChange={handleChange} />
                 </div>
 
                 <div className="col-12 col-md-6">
-                  <label className="form-label fw-semibold">
-                    Curso
-                  </label>
-                  <input
-                    name="curso"
-                    className="form-control"
-                    value={formData.curso}
-                    onChange={handleChange}
-                  />
+                  <label htmlFor="curso" className="form-label fw-semibold">Curso</label>
+                  <input id="curso" name="curso" className="form-control"
+                    value={formData.curso} onChange={handleChange} />
                 </div>
 
                 <div className="col-12 col-md-6">
-                  <label className="form-label fw-semibold">
-                    Nivel
-                  </label>
-                  <input
-                    name="nivel"
-                    className="form-control"
-                    value={formData.nivel}
-                    onChange={handleChange}
-                  />
+                  <label htmlFor="nivel" className="form-label fw-semibold">Nivel</label>
+                  <input id="nivel" name="nivel" className="form-control"
+                    value={formData.nivel} onChange={handleChange} />
                 </div>
 
                 <div className="col-12 col-md-6">
-                  <label className="form-label fw-semibold">
-                    Fecha de inicio
-                  </label>
-                  <input
-                    type="date"
-                    name="fecha_inicio"
-                    className="form-control"
-                    value={formData.fecha_inicio}
-                    onChange={handleChange}
-                  />
+                  <label htmlFor="fecha_inicio" className="form-label fw-semibold">Fecha de inicio</label>
+                  <input id="fecha_inicio" type="date" name="fecha_inicio" className="form-control"
+                    value={formData.fecha_inicio} onChange={handleChange} />
                 </div>
 
                 <div className="col-12 col-md-6 d-flex align-items-center">
                   <div className="form-check mt-3">
-                    <input
-                      type="checkbox"
-                      id="nuevo_ingreso"
-                      name="nuevo_ingreso"
-                      className="form-check-input"
-                      checked={Boolean(formData.nuevo_ingreso)}
-                      onChange={handleChange}
-                    />
-                    <label
-                      className="form-check-label fw-semibold"
-                      htmlFor="nuevo_ingreso"
-                    >
+                    <input id="nuevo_ingreso" type="checkbox" name="nuevo_ingreso"
+                      className="form-check-input" checked={Boolean(formData.nuevo_ingreso)}
+                      onChange={handleChange} />
+                    <label className="form-check-label fw-semibold" htmlFor="nuevo_ingreso">
                       Alumno de nuevo ingreso
                     </label>
                   </div>
                 </div>
 
                 <div className="col-12">
-                  <label className="form-label fw-semibold">
-                    Comentarios
-                  </label>
-                  <textarea
-                    name="comentarios"
-                    className="form-control"
-                    rows="3"
-                    value={formData.comentarios}
-                    onChange={handleChange}
-                  />
+                  <label htmlFor="comentarios" className="form-label fw-semibold">Comentarios</label>
+                  <textarea id="comentarios" name="comentarios" className="form-control"
+                    rows="3" value={formData.comentarios} onChange={handleChange} />
                 </div>
               </div>
 
               <div className="d-flex flex-column flex-sm-row gap-2 justify-content-end mt-4">
-                <button
-                  type="button"
-                  className="btn btn-outline-secondary"
-                  onClick={() => setEditId(null)}
-                  disabled={guardando}
-                >
+                <button type="button" className="btn btn-outline-secondary"
+                  onClick={cancelarEdicion} disabled={guardando}>
                   Cancelar
                 </button>
-
-                <button
-                  type="submit"
-                  className="btn btn-success"
-                  disabled={guardando}
-                >
+                <button type="submit" className="btn btn-success" disabled={guardando}>
                   {guardando ? "Guardando..." : "💾 Guardar cambios"}
                 </button>
               </div>
             </form>
           </div>
-        </div>
+        </section>
       )}
     </main>
   );

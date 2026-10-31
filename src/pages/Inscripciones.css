@@ -1,327 +1,195 @@
-
-/* =========================================
-   DISEÑO GENERAL
-========================================= */
-
-#root {
-  width: 100%;
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
-  box-sizing: border-box;
-}
-
-* {
-  box-sizing: border-box;
-}
+/* Estilos para el módulo de gestión de inscripciones */
 
 .container-inscripciones {
-  width: 100%;
-  max-width: 100%;
   min-height: 100vh;
-  margin: 0 auto;
-  padding: 2rem;
-  background: #f8f9fc;
-  border-radius: 16px;
-  color: #242424;
-  text-align: center;
+  background: #faf7f7;
+  color: #263247;
 }
 
-/* =========================================
-   TÍTULOS
-========================================= */
+.encabezado-inscripciones {
+  padding: 8px 2px;
+}
+
+.etiqueta-seccion {
+  display: inline-block;
+  margin-bottom: 7px;
+  color: #020a7ce7;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
 
 .titulo-inscripciones {
-  color: #242424;
-  font-size: clamp(1.5rem, 3vw, 2.2rem);
-  font-weight: 700;
-  letter-spacing: -0.5px;
-  margin-bottom: 0.5rem;
+  color: #db0404;
+  font-size: clamp(1.45rem, 2.5vw, 2rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
 }
 
-.container-inscripciones p {
-  line-height: 1.6;
-}
-
-.text-secondary {
-  color: #777 !important;
-}
-
-/* =========================================
-   TARJETAS
-========================================= */
-
-.container-inscripciones .card {
-  border: 1px solid #e8e8ee;
-  border-radius: 16px;
-  background: #ffffff;
-  box-shadow: 0 4px 18px rgb(0 0 0 / 5%);
-  transition:
-    box-shadow 300ms ease,
-    transform 300ms ease;
-}
-
-.container-inscripciones .card:hover {
-  box-shadow: 0 8px 25px rgb(0 0 0 / 9%);
-}
-
-.container-inscripciones .card-body {
-  padding: 1.5rem;
+.boton-actualizar {
+  min-height: 42px;
+  border-radius: 10px;
+  font-weight: 600;
 }
 
 .resumen-inscripciones {
-  border-left: 4px solid #646cff !important;
-  text-align: center;
+  border: 1px solid #0d0d0e;
+  border-radius: 15px;
+  box-shadow: 0 5px 18px rgba(28, 48, 79, 0.05);
+}
+
+.resumen-inscripciones .card-body {
+  padding: 22px;
+}
+
+.resumen-etiqueta {
+  color: #7189d8;
+  font-size: 0.9rem;
+  font-weight: 600;
 }
 
 .numero-inscripciones {
-  color: #646cff;
-  font-size: 2.5rem;
-  font-weight: 700;
-  margin-top: 0.5rem;
+  margin-top: 5px;
+  color: #0919f8;
+  font-size: 2.3rem;
+  font-weight: 800;
+  line-height: 1.2;
 }
 
-/* =========================================
-   TABLA RESPONSIVA
-========================================= */
+.resumen-pie {
+  margin-top: 5px;
+  color: #4c8de9;
+  font-size: 0.8rem;
+}
+
+.tarjeta-inscripciones,
+.tarjeta-edicion {
+  overflow: hidden;
+  border: 1px solid #e6ebf2;
+  border-radius: 16px;
+  box-shadow: 0 6px 22px rgba(28, 48, 79, 0.06);
+}
+
+.campo-busqueda {
+  min-height: 44px;
+  border-color: #dce3ed;
+  border-radius: 10px;
+}
+
+.campo-busqueda:focus,
+.form-control:focus {
+  border-color: #86aee8;
+  box-shadow: 0 0 0 0.2rem rgba(36, 105, 190, 0.12);
+}
+
+.texto-resultados {
+  color: #64748b;
+  font-size: 0.9rem;
+}
 
 .tabla-contenedor {
-  width: 100%;
-  max-width: 100%;
-  overflow-x: auto;
-  border: 1px solid #e8e8ee;
+  border: 1px solid #e7edf4;
   border-radius: 12px;
-  background: #ffffff;
-  -webkit-overflow-scrolling: touch;
 }
 
 .tabla-inscripciones {
-  width: 100%;
-  min-width: 1100px;
-  margin-bottom: 0;
+  min-width: 1050px;
   font-size: 0.9rem;
-  text-align: center;
-  vertical-align: middle;
 }
 
 .tabla-inscripciones thead th {
-  background: #f1f2ff;
-  color: #33345c;
-  font-weight: 700;
-  padding: 1rem;
+  padding: 14px 12px;
+  background: #070707;
+  color: #f3f3f5;
+  border-bottom: 1px solid #dce5ef;
+  font-size: 0.78rem;
+  font-weight: 800;
   white-space: nowrap;
-  border-bottom: 2px solid #dedfff;
 }
 
 .tabla-inscripciones tbody td {
-  padding: 0.9rem 0.75rem;
-  border-color: #eeeeF4;
+  padding: 13px 12px;
+  color: #0d0d0e;
+  border-color: #edf1f6;
+  vertical-align: middle;
 }
 
-.tabla-inscripciones tbody tr {
-  transition: background-color 200ms ease;
+.tabla-inscripciones tbody tr:hover {
+  background: #f8fbff;
 }
 
-.tabla-inscripciones tbody tr:hover > * {
-  background-color: #f5f5ff;
-}
-
-.tabla-inscripciones .comentarios-celda {
-  min-width: 180px;
-  max-width: 260px;
+.comentarios-celda {
+  min-width: 150px;
+  max-width: 240px;
   white-space: normal;
   overflow-wrap: anywhere;
 }
 
-/* =========================================
-   BOTONES
-========================================= */
+.texto-vacio {
+  color: #8290a3 !important;
+}
 
-.container-inscripciones .btn {
+.encabezado-edicion {
+  padding: 17px 22px;
+  background: #174ea6;
+  color: #fff;
+  border-bottom: 0;
+}
+
+.encabezado-edicion .etiqueta-seccion {
+  color: #d6e5ff;
+}
+
+.encabezado-edicion h4 {
+  font-weight: 750;
+}
+
+.tarjeta-edicion .form-label {
+  color: #1c76f5;
+}
+
+.tarjeta-edicion .form-control {
+  min-height: 42px;
+  border-color: #dce3ed;
   border-radius: 9px;
-  font-weight: 500;
-  transition:
-    transform 200ms ease,
-    box-shadow 200ms ease,
-    filter 200ms ease;
 }
 
-.container-inscripciones .btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 10px rgb(0 0 0 / 10%);
+.tarjeta-edicion textarea.form-control {
+  min-height: 90px;
 }
 
-.container-inscripciones .btn:active {
-  transform: translateY(0);
+.tarjeta-edicion .form-check-input {
+  width: 1.1em;
+  height: 1.1em;
 }
 
-.container-inscripciones .btn-warning {
-  color: #242424;
-}
-
-.tabla-inscripciones .btn {
-  min-width: 38px;
-  min-height: 36px;
-}
-
-/* =========================================
-   CAMPOS DEL FORMULARIO
-========================================= */
-
-.container-inscripciones .form-control {
-  min-height: 44px;
-  border: 1px solid #dedee8;
+.tarjeta-edicion .btn {
+  min-height: 42px;
+  padding-inline: 18px;
   border-radius: 9px;
-  padding: 0.7rem 0.9rem;
-  text-align: left;
-  background-color: #fff;
-  transition:
-    border-color 200ms ease,
-    box-shadow 200ms ease;
+  font-weight: 600;
 }
 
-.container-inscripciones .form-control:focus {
-  border-color: #646cff;
-  box-shadow: 0 0 0 3px rgb(100 108 255 / 15%);
-  outline: none;
-}
-
-.container-inscripciones textarea.form-control {
-  min-height: 100px;
-}
-
-.container-inscripciones .form-label {
-  display: block;
-  text-align: left;
-  margin-bottom: 0.5rem;
-}
-
-/* Formulario de edición */
-#formulario-edicion {
-  scroll-margin-top: 20px;
-  text-align: left;
-  overflow: hidden;
-}
-
-#formulario-edicion .card-header {
-  background: #646cff !important;
-  border: none;
-}
-
-#formulario-edicion h4 {
-  font-weight: 700;
-}
-
-#formulario-edicion .form-check {
-  text-align: left;
-}
-
-/* =========================================
-   MENSAJES Y CARGA
-========================================= */
-
-.container-inscripciones .alert {
-  border-radius: 10px;
-  text-align: left;
-}
-
-.container-inscripciones .spinner-border {
-  width: 2.5rem;
-  height: 2.5rem;
-}
-
-/* =========================================
-   ANIMACIONES SUAVES
-========================================= */
-
-@keyframes aparecer {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.container-inscripciones > * {
-  animation: aparecer 350ms ease both;
-}
-
-/* =========================================
-   TABLETAS
-========================================= */
-
-@media (max-width: 991.98px) {
-  #root {
-    padding: 1rem;
-  }
-
+@media (max-width: 767.98px) {
   .container-inscripciones {
-    padding: 1.25rem;
+    padding-top: 20px !important;
   }
 
-  .container-inscripciones .card-body {
-    padding: 1rem;
-  }
-}
-
-/* =========================================
-   CELULARES
-========================================= */
-
-@media (max-width: 575.98px) {
-  #root {
-    padding: 0.5rem;
+  .resumen-inscripciones .card-body {
+    padding: 18px;
   }
 
-  .container-inscripciones {
-    padding: 0.75rem;
-    border-radius: 10px;
+  .tarjeta-inscripciones .card-body,
+  .tarjeta-edicion .card-body {
+    padding: 16px !important;
   }
 
-  .titulo-inscripciones {
-    font-size: 1.4rem;
+  .texto-resultados {
+    display: block;
+    text-align: left;
   }
 
-  .container-inscripciones .card {
-    border-radius: 12px;
-  }
-
-  .container-inscripciones .card-body {
-    padding: 0.85rem;
-  }
-
-  .tabla-inscripciones {
-    min-width: 1100px;
-    font-size: 0.82rem;
-  }
-
-  .tabla-inscripciones thead th,
-  .tabla-inscripciones tbody td {
-    padding: 0.7rem;
-  }
-
-  #formulario-edicion .btn {
-    width: 100%;
-    min-height: 44px;
-  }
-}
-
-/* =========================================
-   ACCESIBILIDAD
-========================================= */
-
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
+  .encabezado-edicion {
+    padding: 15px 17px;
   }
 }
