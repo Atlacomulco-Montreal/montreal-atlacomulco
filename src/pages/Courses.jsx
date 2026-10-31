@@ -25,13 +25,8 @@ export default function Courses() {
     <div>
 
       {/* ===== ENCABEZADO ===== */}
-      <section
-        className="text-center text-white py-5"
-        style={{
-          background:
-            "linear-gradient(90deg, #D32F2F, #1565C0, #388E3C, #FBC02D, #7B1FA2)",
-        }}
-      >
+      <section className="text-center text-white py-5" style={{ background: "linear-gradient(90deg, #1565C0, #7B1FA2)",  }}
+>
         <div className="container">
           <h1 className="fw-bold mb-3">Nuestros Cursos</h1>
           <p className="lead">
