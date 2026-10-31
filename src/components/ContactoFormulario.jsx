@@ -1,11 +1,11 @@
 
 import React, { useState } from "react";
 
-// CAMBIA ESTA DIRECCIÓN POR LA URL REAL DE TU BACKEND EN RENDER
-const API_URL = "https://montreal-backend-trh7.onrender.com/api/contacto/";
+const API_URL =
+  "https://montreal-backend-trh7.onrender.com/api/contacto/";
 
-// Número de Montreal con código de país, sin + ni espacios
-const WHATSAPP_NUMBER = "527225720866";
+// Sustituye las X por el número real de WhatsApp de Montreal.
+const WHATSAPP_NUMBER = "52XXXXXXXXXX";
 
 export default function ContactoFormulario() {
   const [isSending, setIsSending] = useState(false);
@@ -28,11 +28,19 @@ export default function ContactoFormulario() {
       nombre: data.get("nombre")?.trim(),
       correo: data.get("correo")?.trim(),
       telefono: data.get("telefono")?.trim(),
+
       interes: data.get("interes"),
+
+      // Valores que espera Django
       dirigido_a: data.get("dirigido_a"),
       modalidad: data.get("modalidad"),
       horario: data.get("horario"),
-      edad: data.get("edad")?.trim(),
+
+      // Django espera un número entero o null
+      edad: data.get("edad")
+        ? Number(data.get("edad"))
+        : null,
+
       mensaje: data.get("mensaje")?.trim(),
     };
 
@@ -50,6 +58,15 @@ export default function ContactoFormulario() {
       return;
     }
 
+    if (
+      formData.edad !== null &&
+      (!Number.isInteger(formData.edad) || formData.edad < 0)
+    ) {
+      setError("La edad debe ser un número entero.");
+      setIsSending(false);
+      return;
+    }
+
     try {
       const response = await fetch(API_URL, {
         method: "POST",
@@ -60,15 +77,39 @@ export default function ContactoFormulario() {
         body: JSON.stringify(formData),
       });
 
-      const result = await response.json();
+      const responseText = await response.text();
 
-      if (!response.ok) {
+      let result = {};
+
+      try {
+        result = responseText ? JSON.parse(responseText) : {};
+      } catch {
         throw new Error(
-          result.error || "No fue posible enviar tu solicitud."
+          `Respuesta inesperada del servidor. Código: ${response.status}`
         );
       }
 
-      // Mensaje preparado para WhatsApp
+      if (!response.ok) {
+        const detalles = Object.entries(result)
+          .map(([campo, mensajes]) => {
+            const detalle = Array.isArray(mensajes)
+              ? mensajes.join(", ")
+              : typeof mensajes === "string"
+              ? mensajes
+              : JSON.stringify(mensajes);
+
+            return `${campo}: ${detalle}`;
+          })
+          .join(" | ");
+
+        throw new Error(
+          detalles ||
+          result.detail ||
+          result.mensaje ||
+          `Error del servidor: ${response.status}`
+        );
+      }
+
       const whatsappMessage = `
 Nueva solicitud de información - Montreal Atlacomulco
 
@@ -77,30 +118,32 @@ Correo: ${formData.correo}
 Teléfono: ${formData.telefono}
 
 Interés: ${formData.interes}
-Dirigido a: ${formData.dirigido_a || "No especificado"}
+Dirigido a: ${formData.dirigido_a}
 Modalidad: ${formData.modalidad}
 Horario: ${formData.horario}
-Edad: ${formData.edad || "No especificada"}
+Edad: ${formData.edad ?? "No especificada"}
 
 Mensaje:
 ${formData.mensaje}
       `;
 
-      const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
-        whatsappMessage
-      )}`;
+      const url =
+        `https://wa.me/${WHATSAPP_NUMBER}?text=` +
+        encodeURIComponent(whatsappMessage);
 
       setWhatsappLink(url);
+
       setSuccess(
-        "¡Gracias! Tu solicitud fue enviada correctamente. Ya puedes compartirla por WhatsApp."
+        "¡Gracias! Tu solicitud se guardó correctamente."
       );
 
       form.reset();
 
     } catch (err) {
+      console.error("Error al enviar solicitud:", err);
       setError(
         err.message ||
-        "Ocurrió un error. Intenta nuevamente más tarde."
+        "No fue posible enviar tu solicitud."
       );
     } finally {
       setIsSending(false);
@@ -111,59 +154,84 @@ ${formData.mensaje}
     <form
       onSubmit={handleSubmit}
       className="row justify-content-center"
-      style={{ maxWidth: "750px", margin: "0 auto" }}
+      style={{
+        maxWidth: "750px",
+        margin: "0 auto",
+      }}
     >
       <div className="col-12 mb-3">
-        <label className="form-label fw-bold">Nombre completo *</label>
+        <label className="form-label fw-bold">
+          Nombre completo *
+        </label>
         <input
           type="text"
           name="nombre"
           className="form-control"
           placeholder="Escribe tu nombre completo"
-          autoComplete="name"
-          maxLength="120"
-          required
-        />
-      </div>
-
-      <div className="col-md-6 mb-3">
-        <label className="form-label fw-bold">Correo electrónico *</label>
-        <input
-          type="email"
-          name="correo"
-          className="form-control"
-          placeholder="ejemplo@correo.com"
-          autoComplete="email"
-          required
-        />
-      </div>
-
-      <div className="col-md-6 mb-3">
-        <label className="form-label fw-bold">Teléfono / WhatsApp *</label>
-        <input
-          type="tel"
-          name="telefono"
-          className="form-control"
-          placeholder="10 dígitos"
-          autoComplete="tel"
-          maxLength="20"
           required
         />
       </div>
 
       <div className="col-md-6 mb-3">
         <label className="form-label fw-bold">
+          Correo electrónico *
+        </label>
+        <input
+          type="email"
+          name="correo"
+          className="form-control"
+          placeholder="ejemplo@correo.com"
+          required
+        />
+      </div>
+
+      <div className="col-md-6 mb-3">
+        <label className="form-label fw-bold">
+          Teléfono / WhatsApp *
+        </label>
+        <input
+          type="tel"
+          name="telefono"
+          className="form-control"
+          placeholder="Número de teléfono"
+          required
+        />
+      </div>
+
+      <div className="col-12 mb-3">
+        <label className="form-label fw-bold">
           ¿Qué información necesitas? *
         </label>
-        <select name="interes" className="form-select" required defaultValue="">
-          <option value="">Selecciona una opción</option>
-          <option value="Cursos de inglés">Cursos de inglés</option>
-          <option value="Cursos de computación">Cursos de computación</option>
-          <option value="Regularización académica">Regularización académica</option>
-          <option value="Certificaciones CONOCER">Certificaciones CONOCER</option>
-          <option value="Certificaciones Cambridge">Certificaciones Cambridge</option>
-          <option value="Talleres culturales">Talleres culturales</option>
-          <option value="Otro servicio">Otro servicio</option>
+        <select
+          name="interes"
+          className="form-select"
+          defaultValue=""
+          required
+        >
+          <option value="" disabled>
+            Selecciona una opción
+          </option>
+          <option value="Cursos de inglés">
+            Cursos de inglés
+          </option>
+          <option value="Cursos de computación">
+            Cursos de computación
+          </option>
+          <option value="Regularización académica">
+            Regularización académica
+          </option>
+          <option value="Certificaciones CONOCER">
+            Certificaciones CONOCER
+          </option>
+          <option value="Certificaciones Cambridge">
+            Certificaciones Cambridge
+          </option>
+          <option value="Talleres culturales">
+            Talleres culturales
+          </option>
+          <option value="Otro servicio">
+            Otro servicio
+          </option>
         </select>
       </div>
 
@@ -171,45 +239,67 @@ ${formData.mensaje}
         <label className="form-label fw-bold">
           ¿Para quién es el servicio?
         </label>
-        <select name="dirigido_a" className="form-select" defaultValue="">
-          <option value="">Selecciona una opción</option>
-          <option value="Para mí">Para mí</option>
-          <option value="Para mi hijo o hija">Para mi hijo o hija</option>
-          <option value="Para otra persona">Para otra persona</option>
+        <select
+          name="dirigido_a"
+          className="form-select"
+          defaultValue="yo"
+        >
+          <option value="yo">Para mí</option>
+          <option value="hijo">Para mi hijo o hija</option>
+          <option value="otro">Para otra persona</option>
         </select>
       </div>
 
       <div className="col-md-6 mb-3">
-        <label className="form-label fw-bold">Modalidad *</label>
-        <select name="modalidad" className="form-select" required defaultValue="">
-          <option value="">Selecciona modalidad</option>
-          <option value="Presencial">Presencial</option>
-          <option value="En línea">En línea</option>
-          <option value="Ambas">Me interesan ambas</option>
+        <label className="form-label fw-bold">
+          Modalidad *
+        </label>
+        <select
+          name="modalidad"
+          className="form-select"
+          defaultValue=""
+          required
+        >
+          <option value="" disabled>
+            Selecciona una opción
+          </option>
+          <option value="presencial">Presencial</option>
+          <option value="online">En línea</option>
+          <option value="ambas">Ambas</option>
         </select>
       </div>
 
       <div className="col-md-6 mb-3">
-        <label className="form-label fw-bold">Horario de preferencia *</label>
-        <select name="horario" className="form-select" required defaultValue="">
-          <option value="">Selecciona horario</option>
-          <option value="Matutino">Matutino</option>
-          <option value="Vespertino">Vespertino</option>
-          <option value="Fines de semana">Fines de semana</option>
-          <option value="Flexible">Flexible</option>
+        <label className="form-label fw-bold">
+          Horario de preferencia *
+        </label>
+        <select
+          name="horario"
+          className="form-select"
+          defaultValue=""
+          required
+        >
+          <option value="" disabled>
+            Selecciona una opción
+          </option>
+          <option value="matutino">Matutino</option>
+          <option value="vespertino">Vespertino</option>
+          <option value="fines_semana">Fines de semana</option>
+          <option value="flexible">Flexible</option>
         </select>
       </div>
 
-      <div className="col-12 mb-3">
+      <div className="col-md-6 mb-3">
         <label className="form-label fw-bold">
           Edad del interesado (opcional)
         </label>
         <input
-          type="text"
+          type="number"
           name="edad"
           className="form-control"
-          placeholder="Ej. 15 años"
-          maxLength="30"
+          placeholder="Ej. 15"
+          min="0"
+          step="1"
         />
       </div>
 
@@ -220,47 +310,58 @@ ${formData.mensaje}
         <textarea
           name="mensaje"
           className="form-control"
-          rows="5"
-          maxLength="3000"
-          placeholder="Escribe tus dudas, objetivos o información que deseas conocer..."
+          rows="4"
+          placeholder="Escribe tu mensaje o consulta..."
           required
-        />
-      </div>
-
-      <div className="col-12 text-center mt-3">
-        <button
-          type="submit"
-          className="btn btn-danger btn-lg px-5"
-          disabled={isSending}
-        >
-          {isSending ? "Enviando solicitud..." : "Enviar solicitud"}
-        </button>
+        ></textarea>
       </div>
 
       {error && (
-        <div className="col-12 mt-3">
-          <div className="alert alert-danger">{error}</div>
+        <div className="col-12 mb-3">
+          <div className="alert alert-danger">
+            {error}
+          </div>
         </div>
       )}
 
       {success && (
-        <div className="col-12 mt-3">
-          <div className="alert alert-success">{success}</div>
+        <div className="col-12 mb-3">
+          <div className="alert alert-success">
+            {success}
+          </div>
+        </div>
+      )}
 
+      {whatsappLink && (
+        <div className="col-12 mb-3 text-center">
           <a
             href={whatsappLink}
             target="_blank"
             rel="noopener noreferrer"
-            className="btn btn-success btn-lg w-100"
+            className="btn btn-success"
           >
-            Enviar también por WhatsApp
+            Compartir solicitud por WhatsApp
           </a>
-          <small className="text-muted d-block mt-2 text-center">
-            Se abrirá WhatsApp con los datos preparados. Deberás presionar
-            Enviar para compartirlos.
-          </small>
         </div>
       )}
+
+      <div className="col-12 text-center mt-2">
+        <button
+          type="submit"
+          className="btn btn-danger px-5 py-3"
+          disabled={isSending}
+        >
+          {isSending
+            ? "Enviando solicitud..."
+            : "Enviar solicitud"}
+        </button>
+      </div>
+
+      <div className="col-12 mt-3 text-center">
+        <small className="text-muted">
+          * Campos obligatorios
+        </small>
+      </div>
     </form>
   );
 }
